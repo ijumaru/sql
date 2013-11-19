@@ -1,5 +1,5 @@
 <?php
-class SelectOntologySql extends SelectSql {
+class OntologySelectSql {
 	private $subjectName;
 	private $subjectUri;
 	private $predictName;
@@ -36,10 +36,10 @@ class SelectOntologySql extends SelectSql {
 	 * SQLを作成して返す
 	 * 比較演算子は値に%が含まれているかどうかで判定
 	 * 含まれていればLIKE、いなければ=
-	 * @see Sql::get()
 	 */
 	public function toString() {
-		$this->select("
+		$sql = new SelectSql();
+		$sql->select("
 				ontology.id
 				, subject.name AS subject_name
 				, subject.uri AS subject_uri
@@ -48,15 +48,15 @@ class SelectOntologySql extends SelectSql {
 				, object.name AS object_name
 				, object.uri AS object_uri
 		");
-		$this->from("ontology");
-		$this->innerJoin("concept subject", "subject.id = ontology.subject");
-		$this->innerJoin("concept predict", "predict.id = ontology.predict");
-		$this->innerJoin("concept object", "object.id = ontology.object");
+		$sql->from("ontology");
+		$sql->innerJoin("concept subject", "subject.id = ontology.subject");
+		$sql->innerJoin("concept predict", "predict.id = ontology.predict");
+		$sql->innerJoin("concept object", "object.id = ontology.object");
 		if (isset($this->id)) {
-			$this->where("ontology.id = ?");
+			$sql->where("ontology.id = ?");
 			$this->params[] = $this->id;
 		} else {
-			$this->where("1 = 1");
+			$sql->where("1 = 1");
 			foreach ($this->props as $key => $value) {
 				foreach ($value as $key2 => $value2) {
 					if (isset($value2)) {
@@ -64,13 +64,13 @@ class SelectOntologySql extends SelectSql {
 						if (strpos($value2, '%') !== false) {
 							$operator = 'LIKE';
 						}
-						$this->andWhere($key.'.'.$key2.' '.$operator.' ?');
+						$sql->andWhere($key.'.'.$key2.' '.$operator.' ?');
 						$this->params[] = $value2;
 					}
 				}
 			}
 		}
-		return parent::toString();
+		return $sql->toString();
 	}
 
 	public function getParams() {
