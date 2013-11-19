@@ -29,6 +29,10 @@ class InsertSql {
 		return $sql;
 	}
 
+	/**
+	 * パラメータの取得
+	 * toString()の後でないと値が取れない。要修正。
+	 */
 	public function getParams() {
 		return $this->params;
 	}
