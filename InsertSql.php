@@ -8,6 +8,10 @@ class InsertSql {
 		$this->into = $into;
 	}
 
+	/**
+	 * insertする値をセットする
+	 * @param unknown $values 連想配列（フィールド名 => 値）
+	 */
 	public function values($values) {
 		$this->values = $values;
 	}

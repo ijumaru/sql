@@ -1,36 +1,44 @@
 <?php
 class OntologyInsertSql {
-	private $ontology = array('subject' => array(), 'predict' => array(), 'object' => array());
-	private $params;
 	private $con;
+	private $values = array("subject" => "", "predict" => "", "object" => "");
 
+	/**
+	 * コンストラクタ
+	 * @param PDO $con
+	 */
 	public function __construct($con) {
 		$this->con = $con;
 	}
 
-	public function setOntology($ontology) {
-		$this->ontology = $ontology;
+	/**
+	 * conceptIDをセットする
+	 * @param unknown $ontologyField ontologyのフィールド（subject/predict/object）
+	 * @param unknown $conceptField conceptのフィールド（name, uri）
+	 * @param unknown $value 値
+	 */
+	public function setId($ontologyField, $conceptField, $value) {
+		$sql = new SelectSql();
+		$sql->from("concept");
+		$sql->where("concept.".$conceptField." = ?");
+		$stmt = $this->con->prepare($sql->toString());
+		$stmt->execute(array($value));
+		$conceptData = $stmt->fetchAll();
+		if (count($conceptData) === 0) {
+			$sql = new InsertSql();
+			$sql->into("concept");
+			$sql->values(array($conceptField => $value));
+			$stmt = $this->con->prepare($sql->toString());
+			$stmt->execute($sql->getParams());
+			$this->values[$ontologyField] = $this->con->lastInsertId();
+		} else {
+			$this->values[$ontologyField] = $conceptData[0]["id"];
+		}
 	}
 
 	public function toString() {
-		foreach ($this->ontology as $key => $value) {
-			$sql = new SelectSql();
-			$sql->from("concept");
-			$sql->where("concept.name = ?");
-			$sql->andWhere("concept.uri = ?");
-			$stmt = $this->con->prepare($sql->toString());
-			$stmt->execute(array_values($value));
-			$conceptData = $stmt->fetchAll();
-			if (count($conceptData) === 0) {
-				$sql = new InsertSql();
-				$sql->into("concept");
-				$sql->values($value);
-				$stmt = $this->con->prepare($sql->toString());
-				$stmt->execute($sql->getParams());
-				$conceptid[$key] = $this->con->lastInsertId();
-			} else {
-				$conceptid[$key] = $conceptData[0]["id"];
-			}
+		if (empty($this->values["subject"]) || empty($this->values["predict"]) || empty($this->values["object"])) {
+			return;
 		}
 		$sql = new SelectSql();
 		$sql->from("ontology");
@@ -38,19 +46,16 @@ class OntologyInsertSql {
 		$sql->andWhere("ontology.predict = ?");
 		$sql->andWhere("ontology.object = ?");
 		$stmt = $this->con->prepare($sql->toString());
-		$stmt->execute(array_values($conceptid));
+		$stmt->execute(array_values($this->values));
 		if ($stmt->rowCount() === 0) {
 			$sql = new InsertSql();
 			$sql->into("ontology");
-			$sql->values($conceptid);
-// 			$this->execute($sql->toString(), $sql->getParams());
-			$sqlString = $sql->toString();
-			$this->params = $sql->getParams();
-			return $sqlString;
+			$sql->values($this->values);
+			return $sql->toString();
 		}
 	}
 
 	public function getParams() {
-		return $this->params;
+		return $this->values;
 	}
 }

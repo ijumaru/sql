@@ -59,7 +59,7 @@ class OntologySelectSql {
 			$sql->where("1 = 1");
 			foreach ($this->props as $key => $value) {
 				foreach ($value as $key2 => $value2) {
-					if (isset($value2)) {
+					if (isset($value2) && !empty($value2)) {
 						$operator = '=';
 						if (strpos($value2, '%') !== false) {
 							$operator = 'LIKE';
