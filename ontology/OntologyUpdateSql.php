@@ -1,7 +1,8 @@
 <?php
-class OntologyInsertSql {
+class OntologyUpdateSql {
 	private $con;
 	private $values = array("subject" => "", "predict" => "", "object" => "");
+	private $params;
 
 	/**
 	 * コンストラクタ
@@ -36,26 +37,21 @@ class OntologyInsertSql {
 		}
 	}
 
-	public function toString() {
-		if (empty($this->values["subject"]) || empty($this->values["predict"]) || empty($this->values["object"])) {
+	public function toString($ontologyid) {
+		if (empty($this->values["subject"]) || empty($this->values["predict"])
+			|| empty($this->values["object"]) || empty($ontologyid)) {
 			return;
 		}
-		$sql = new SelectSql();
-		$sql->from("ontology");
-		$sql->where("ontology.subject = ?");
-		$sql->andWhere("ontology.predict = ?");
-		$sql->andWhere("ontology.object = ?");
-		$stmt = $this->con->prepare($sql->toString());
-		$stmt->execute(array_values($this->values));
-		if ($stmt->rowCount() === 0) {
-			$sql = new InsertSql();
-			$sql->into("ontology");
-			$sql->values($this->values);
-			return $sql->toString();
-		}
+		$sql = new UpdateSql();
+		$sql->table("ontology");
+		$sql->setValues($this->values);
+		$sql->whereValues(array("id" => $ontologyid));
+		$sqlString = $sql->toString();
+		$this->params = $sql->getParams();
+		return $sqlString;
 	}
 
 	public function getParams() {
-		return $this->values;
+		return $this->params;
 	}
 }
