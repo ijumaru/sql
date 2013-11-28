@@ -1,30 +1,18 @@
 <?php
 class OntologySelectSql {
-	private $subjectName;
-	private $subjectUri;
-	private $predictName;
-	private $predictUri;
-	private $objectName;
-	private $objecturi;
 	private $params;
 	private $props = array('subject' => array(), 'predict' => array(), 'object' => array());
 	private $id;
 
 	public function setSubject($name, $uri) {
-		$this->subjectName = $name;
-		$this->subjectUri = $uri;
 		$this->props["subject"] = array('name' => $name, 'uri' => $uri);
 	}
 
 	public function setPredict($name, $uri) {
-		$this->predictName = $name;
-		$this->predictUri = $uri;
 		$this->props["predict"] = array('name' => $name, 'uri' => $uri);
 	}
 
 	public function setObject($name, $uri) {
-		$this->objectName = $name;
-		$this->objectUri = $uri;
 		$this->props["object"] = array('name' => $name, 'uri' => $uri);
 	}
 
