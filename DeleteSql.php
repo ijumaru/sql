@@ -13,6 +13,9 @@ class DeleteSql {
 	}
 
 	public function toString() {
+		if (empty($this->table)) {
+			return;
+		}
 		foreach ($this->whereValues as $key => $value) {
 			if (!empty($where)) {
 				$where.= ', ';
@@ -20,7 +23,10 @@ class DeleteSql {
 			$where.= $key.' = ?';
 			$this->params[] = $value;
 		}
-		$sql = 'DELETE FROM '.$this->table.' WHERE '.$where;
+		$sql = 'DELETE FROM '.$this->table;
+		if (!empty($where)) {
+			$sql.=' WHERE '.$where;
+		}
 		return $sql;
 	}
 
