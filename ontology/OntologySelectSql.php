@@ -3,6 +3,7 @@ class OntologySelectSql {
 	private $params;
 	private $props = array('subject' => array(), 'predict' => array(), 'object' => array());
 	private $id;
+	private $order;
 
 	public function setSubject($name, $uri) {
 		$this->props["subject"] = array('name' => $name, 'uri' => $uri);
@@ -18,6 +19,10 @@ class OntologySelectSql {
 
 	public function setId($id) {
 		$this->id = $id;
+	}
+
+	public function order($order) {
+		$this->order = $order;
 	}
 
 	/**
@@ -58,6 +63,7 @@ class OntologySelectSql {
 				}
 			}
 		}
+		$sql->order($this->order);
 		return $sql->toString();
 	}
 
